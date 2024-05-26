@@ -49,22 +49,29 @@ log.setDefaultLevel(process.env.METAMASK_DEBUG ? 'debug' : 'warn');
 // setup plugin communication
 //
 
-if (shouldInjectProvider()) {
-  // setup background connection
-  const metamaskStream = new WindowPostMessageStream({
-    name: INPAGE,
-    target: CONTENT_SCRIPT,
-  });
+window.addEventListener(  "eip6963:requestProvider",
+  (event) => {
+    if (!shouldInjectProvider()) {
+      return;
+    }
 
-  initializeProvider({
-    connectionStream: metamaskStream,
-    logger: log,
-    shouldShimWeb3: true,
-    providerInfo: {
-      uuid: uuid(),
-      name: process.env.METAMASK_BUILD_NAME,
-      icon: process.env.METAMASK_BUILD_ICON,
-      rdns: process.env.METAMASK_BUILD_APP_ID,
-    },
-  });
-}
+    // setup background connection
+    const metamaskStream = new WindowPostMessageStream({
+      name: INPAGE,
+      target: CONTENT_SCRIPT,
+    });
+
+    initializeProvider({
+      connectionStream: metamaskStream,
+      logger: log,
+      shouldShimWeb3: false,
+      shouldSetOnWindow: false,
+      providerInfo: {
+        uuid: uuid(),
+        name: process.env.METAMASK_BUILD_NAME,
+        icon: process.env.METAMASK_BUILD_ICON,
+        rdns: process.env.METAMASK_BUILD_APP_ID,
+      },
+    });
+  }
+);
