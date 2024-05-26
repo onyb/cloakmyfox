@@ -8,7 +8,8 @@ export default function shouldInjectProvider() {
     doctypeCheck() &&
     suffixCheck() &&
     documentElementCheck() &&
-    !blockedDomainCheck()
+    !blockedDomainCheck() &&
+    allowedDomainCheck()
   );
 }
 
@@ -102,5 +103,36 @@ function blockedDomainCheck() {
         trimTrailingSlash(blockedUrlPath) ===
         trimTrailingSlash(currentHostname + currentPathname),
     )
+  );
+}
+
+/**
+ * Checks if the current domain is a known dappradar domain
+ *
+ * @returns {boolean} {@code true} if the current domain is a known dappradar domain
+ */
+function allowedDomainCheck() {
+  // Hardcoded for now, but could be fetched using DappRadar API
+  const allowedDomains = [
+    // Trusted dapps
+    'app.uniswap.org',
+    'app.sushi.com',
+    'matcha.xyz',
+    'swap.cow.fi',
+    'curve.fi',
+
+    // Dapps known to track wallet addresses using cookies
+    'kyberswap.com',
+
+    // Dapp known to fingerprint using window.ethereum
+    'nytimes.com', // Not a dapp, so should not inject provider
+  ];
+
+  const { hostname: currentHostname } = window.location;
+
+  return allowedDomains.some(
+    (domain) =>
+      domain === currentHostname ||
+      currentHostname.endsWith(`.${domain}`),
   );
 }
