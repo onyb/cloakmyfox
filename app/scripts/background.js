@@ -1027,9 +1027,67 @@ function setupSentryGetStateGlobal(store) {
 
 async function initBackground() {
   await onInstall();
-  initialize().catch(log.error);
+  await initialize().catch(log.error);
+  setupCustomListeners();
+}
+
+function detectCookieTheft(cookie) {
+  if (!controller) {
+    console.error('Controller is not initialized.');
+    return;
+  }
+
+  const accounts = Object.keys(
+    controller.preferencesController.store.getState().identities,
+  );
+
+  return accounts.some((account) => {
+    return cookie.toLowerCase().includes(account.toLowerCase());
+  });
+}
+
+function setupCustomListeners() {
+  chrome.runtime.onMessage.addListener(function (
+    request,
+    sender,
+    sendResponse,
+  ) {
+    if (request.type === 'detectCookieTheft') {
+      const { data } = request;
+      if (!data) {
+        return;
+      }
+
+      if (detectCookieTheft(data)) {
+        createCookieTheftNotification(sender.origin);
+      }
+    }
+  });
 }
 
 if (!process.env.SKIP_BACKGROUND_INITIALIZATION) {
   initBackground();
+}
+
+function createCookieTheftNotification(origin) {
+  if (!chrome.notifications) {
+    console.error('Notifications API is not available.');
+    return;
+  }
+  chrome.notifications.create(
+    '',
+    {
+      type: 'basic',
+      iconUrl: '../../images/cloakmyfox.png',
+      title: 'Cookie Theft Alert',
+      message: `A potential cookie theft attempt was detected in ${new URL(origin).host}`,
+    },
+    (notificationId) => {
+      if (chrome.runtime.lastError) {
+        console.error('Error creating notification:', chrome.runtime.lastError);
+      } else {
+        console.log('Notification created with ID:', notificationId);
+      }
+    },
+  );
 }

