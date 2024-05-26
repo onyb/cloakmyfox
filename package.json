@@ -109,6 +109,7 @@
     "githooks:install": "husky install",
     "fitness-functions": "ts-node development/fitness-functions/index.ts",
     "generate-beta-commit": "node ./development/generate-beta-commit.js",
+    "generate-dapp-list": "node ./development/generate-dapp-list.js",
     "validate-branch-name": "validate-branch-name",
     "add-release-label-to-pr-and-linked-issues": "ts-node ./.github/scripts/add-release-label-to-pr-and-linked-issues.ts",
     "check-pr-has-required-labels": "ts-node ./.github/scripts/check-pr-has-required-labels.ts",
